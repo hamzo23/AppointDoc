@@ -4,6 +4,9 @@ const doctorModel = require("../models/doctorModel");
 const appointmentModel = require("../models/appointmentModel");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
+const MAX_ATTEMPTS = 5;
+// 30 minute duration (1000ms * 60s * 30m)
+const LOCK_DURATION = 30 * 60 * 1000;
 
 // login callback
 const loginController = async (req, res) => {
@@ -13,11 +16,35 @@ const loginController = async (req, res) => {
     if (!user) {
       return res.status(404).send('User Not Found');
     }
+
+    // Check if the account is locked
+    if (user.isLocked && user.lockUntil > Date.now()) {
+      return res.status(403).send(`Account is locked. Please try again in ${Math.ceil((user.lockUntil - Date.now()) / 1000 / 60)} minutes.`);
+    }
+
     // Compare hashed password
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(401).send('Invalid Password');
+      // Increment failed attempts
+      user.failedLoginAttempts += 1;
+
+      // Lock account if max attempts reached
+      if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
+        user.isLocked = true;
+        user.lockUntil = Date.now() + LOCK_DURATION;
+      }
+      // Save the user data
+      await user.save();
+
+      return res.status(401).send(`Invalid password. ${MAX_ATTEMPTS - user.failedLoginAttempts} attempts remaining.`);
     }
+
+    // Reset login attempts on success
+    user.failedLoginAttempts = 0;
+    user.isLocked = false;
+    user.lockUntil = null;
+    await user.save();
+
     const token = jwt.sign({id: user._id}, process.env.JWT_SECRET,{expiresIn:"1d"},);
     res.status(200).send({ message: "Login Success", success: true, token });
   } catch (error) {
