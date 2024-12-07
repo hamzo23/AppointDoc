@@ -17,7 +17,7 @@ const Login = () => {
       dispatch(hideLoading());
       if (data.success) {
         message.info("2FA Code Sent. Redirecting...");
-        navigate("/2fa", { state: { email: values.email } }); // Always navigate to 2FA
+        navigate("/2fa", { state: { email: values.email } }); 
       } else {
         message.error(data.message);
       }

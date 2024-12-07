@@ -101,6 +101,7 @@ const loginController = async (req, res) => {
 };
 
 const verify2FAController = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   try {
     const { email, code } = req.body;
     const user = await userModel.findOne({ email });
