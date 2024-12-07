@@ -89,6 +89,9 @@ const userMongooseSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  failedLoginAttempts: { type: Number, default: 0 },
+  isLocked: { type: Boolean, default: false },
+  lockUntil: { type: Date, default: null },
   twoFactorCode: {
     type: String,
     default: null,

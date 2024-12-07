@@ -1,7 +1,11 @@
+const { logActivity } = require("./controllerUtils.js");
 const appointmentModel = require("../models/appointmentModel");
 const doctorModel = require("../models/doctorModel");
 const userModel = require("../models/userModel");
+
 const getDoctorInfoController = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
   try {
     const doctor = await doctorModel.findOne({ userId: req.body.userId });
     res.status(200).send({
@@ -11,6 +15,7 @@ const getDoctorInfoController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    logActivity('ERROR: Fetch doctor data failed', ip, undefined, { requestBody: req.body });
     res.status(500).send({
       success: false,
       error,
@@ -21,11 +26,15 @@ const getDoctorInfoController = async (req, res) => {
 
 // update doc profile
 const updateProfileController = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const user = await userModel.findOne({ _id: req.body.userId });
+
   try {
     const doctor = await doctorModel.findOneAndUpdate(
       { userId: req.body.userId },
       req.body
     );
+    logActivity("SUCCESS: Doctor profile updated", ip, user, { doctor: doctor });
     res.status(201).send({
       success: true,
       message: "Doctor Profile Updated",
@@ -33,6 +42,7 @@ const updateProfileController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    logActivity("ERROR: Doctor profile update failed", ip, user, { requestBody: req.body });
     res.status(500).send({
       success: false,
       message: "Doctor Profile Update Issue",
@@ -43,6 +53,8 @@ const updateProfileController = async (req, res) => {
 
 //get single docotor
 const getDoctorByIdController = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
   try {
     const doctor = await doctorModel.findOne({ _id: req.body.doctorId });
     res.status(200).send({
@@ -52,6 +64,7 @@ const getDoctorByIdController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    logActivity('ERROR: Fetch single doctor info failed', ip, undefined, { requestBody: req.body });
     res.status(500).send({
       success: false,
       error,
@@ -61,6 +74,8 @@ const getDoctorByIdController = async (req, res) => {
 };
 
 const doctorAppointmentsController = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
   try {
     const doctor = await doctorModel.findOne({ userId: req.body.userId });
     const appointments = await appointmentModel.find({
@@ -73,6 +88,7 @@ const doctorAppointmentsController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    logActivity('ERROR: Fetch doctor appointments data failed', ip, undefined, { requestBody: req.body });
     res.status(500).send({
       success: false,
       error,
@@ -82,6 +98,8 @@ const doctorAppointmentsController = async (req, res) => {
 };
 
 const updateStatusController = async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
   try {
     const { appointmentsId, status } = req.body;
     const appointments = await appointmentModel.findByIdAndUpdate(
@@ -99,12 +117,14 @@ const updateStatusController = async (req, res) => {
       { _id: user._id },
       { $set: { notification: notification } }
     );
+    logActivity("SUCCESS: Appointment status updated", ip, user, {appointments: appointments, appointmentId: appointmentsId, status: status});
     res.status(200).send({
       success: true,
       message: "Appointment Status Updated",
     });
   } catch (error) {
     console.log(error);
+    logActivity("ERROR: Appointment status update failed", ip, undefined, { requestBody: req.body });
     res.status(500).send({
       success: false,
       error,

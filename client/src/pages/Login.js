@@ -23,7 +23,7 @@ const Login = () => {
       }
     } catch (error) {
       dispatch(hideLoading());
-      message.error("Something went wrong");
+      message.error(error?.response?.data || "Something went wrong");
     }
   };
   // const submitHandler = async (values) => {

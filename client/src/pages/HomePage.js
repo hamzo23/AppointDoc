@@ -77,7 +77,9 @@ const HomePage = () => {
       <h3 className="text-center">Home Page</h3>
       <br />
       <Row>
-        {doctors && doctors.map((doctor) => <DoctorList doctor={doctor} />)}
+        {doctors && doctors.map((doctor) => (
+          <DoctorList key={doctor._id} doctor={doctor} />
+        ))}
       </Row>
     </Layout>
   );
