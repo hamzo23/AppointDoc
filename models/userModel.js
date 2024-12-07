@@ -92,6 +92,14 @@ const userMongooseSchema = new mongoose.Schema({
   failedLoginAttempts: { type: Number, default: 0 },
   isLocked: { type: Boolean, default: false },
   lockUntil: { type: Date, default: null },
+  twoFactorCode: {
+    type: String,
+    default: null,
+  },
+  twoFactorCodeExpiry: {
+    type: Date,
+    default: null,
+  },
 });
 
 // Add the Joi validation to the Mongoose schema

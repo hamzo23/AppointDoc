@@ -8,6 +8,35 @@ const { logActivity } = require("./controllerUtils.js");
 const MAX_ATTEMPTS = 5;
 // 30 minute duration (1000ms * 60s * 30m)
 const LOCK_DURATION = 30 * 60 * 1000;
+const nodemailer = require("nodemailer");
+
+const generateCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const sendAuthCodeToEmail = async (email, code) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: 'kumailkazmi14@gmail.com', // Your email address
+      pass: 'ghql poim iomy mwls', // Your email password or app password
+    },
+  });
+
+  const mailOptions = {
+    from: 'kumailkazmi14@gmail.com',
+    to: email,
+    subject: "Secure Appointment Authentication Code",
+    text: `Your authentication code is: ${code}\nThis code will expire in 5 minutes.`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
 
 // login callback
 const loginController = async (req, res) => {
@@ -20,14 +49,13 @@ const loginController = async (req, res) => {
       logActivity("ACTIVITY: User not found", ip, { email: email}, undefined);
       return res.status(404).send('User Not Found');
     }
-
+      
     // Check if the account is locked
     if (user.isLocked && user.lockUntil > Date.now()) {
       logActivity("ACTIVITY: Locked account login attempt", ip, user, undefined);
       return res.status(403).send(`Account is locked. Please try again in ${Math.ceil((user.lockUntil - Date.now()) / 1000 / 60)} minutes.`);
     }
-
-    // Compare hashed password
+  
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       // Increment failed attempts
@@ -42,28 +70,93 @@ const loginController = async (req, res) => {
       }
       // Save the user data
       await user.save();
-
-      return res.status(401).send(`Invalid password. ${MAX_ATTEMPTS - user.failedLoginAttempts} attempts remaining.`);
+      
+      return res.status(401).send({ success: false, message: 'Invalid Password' });
     }
 
+    // Generate 2FA code
+    const code = generateCode();
+    console.log(`Generated 2FA code: ${code}`);
+    const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+
+    user.twoFactorCode = code;
+    user.twoFactorCodeExpiry = expiry;
+    await user.save();
+
+    // Send code via email
+    await sendAuthCodeToEmail(email, code);
+
+    res.status(200).send({ 
+      message: "2FA Code Sent. Please verify to continue.",
+      success: true,
+      requires2FA: true,
+    });
+  } catch (error) {
+    const { email } = req.body;
+    const user = await userModel.findOne({ email });
+    console.error(error);
+    logActivity("ERROR: Login CTRL", ip, user, { requestBody: req.body });
+    res.status(500).send({ message: `Error in Login CTRL: ${error.message}` });
+  }
+};
+
+const verify2FAController = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      logActivity("ACTIVITY: User not found", ip, { email: email}, undefined);
+      return res.status(404).send({ success: false, message: 'User Not Found' });
+    }
+
+    // Check if code matches and is within expiry
+    if (user.twoFactorCode !== code || new Date() > user.twoFactorCodeExpiry) {
+      return res.status(401).send({ success: false, message: 'Invalid or Expired Code' });
+    }
+
+    // Clear the 2FA code and expiry
+    user.twoFactorCode = null;
+    user.twoFactorCodeExpiry = null;
+    await user.save();
+    
     // Reset login attempts on success
     user.failedLoginAttempts = 0;
     user.isLocked = false;
     user.lockUntil = null;
     await user.save();
 
-    const token = jwt.sign({id: user._id}, process.env.JWT_SECRET,{expiresIn:"1d"},);
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
     logActivity("SUCCESS: Login", ip, user, undefined);
-    res.status(200).send({ message: "Login Success", success: true, token });
+    res.status(200).send({ message: "2FA Verified Successfully", success: true, token });
   } catch (error) {
-    const { email } = req.body;
-    const user = await userModel.findOne({ email });
-    console.log(error);
-    console.log(process.env.JWT_SECRET);
-    logActivity("ERROR: Login CTRL", ip, user, { requestBody: req.body });
-    res.status(500).send({ message: `Error in Login CTRL ${error.message}` });
+    console.error(error);
+    res.status(500).send({ message: `Error in 2FA Verification: ${error.message}` });
   }
 };
+
+// const loginController = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = await userModel.findOne({ email });
+//     if (!user) {
+//       return res.status(404).send('User Not Found');
+//     }
+//     // Compare hashed password
+//     const match = await bcrypt.compare(password, user.password);
+//     if (!match) {
+//       return res.status(401).send('Invalid Password');
+//     }
+//     const token = jwt.sign({id: user._id}, process.env.JWT_SECRET,{expiresIn:"1d"},);
+//     res.status(200).send({ message: "Login Success", success: true, token });
+//   } catch (error) {
+//     console.log(error);
+//     console.log(process.env.JWT_SECRET);
+//     res.status(500).send({ message: `Error in Login CTRL ${error.message}` });
+//   }
+// };
 
 //Register Callback
 const registerController = async (req, res) => {
@@ -441,4 +534,4 @@ const userAppointmentsController = async (req, res) => {
   }
 };
 
-module.exports = { loginController, registerController, authController , applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDocotrsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController};
+module.exports = { loginController, verify2FAController, registerController, authController , applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDocotrsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController};
