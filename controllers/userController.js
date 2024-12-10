@@ -38,6 +38,7 @@ const sendAuthCodeToEmail = async (email, code) => {
   }
 };
 
+
 // login callback
 const loginController = async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -383,6 +384,13 @@ const bookingAvailabilityController = async (req, res) => {
   }
 };
 
+// userController.js or termsController.js
+const getTermsAndConditions = (req, res) => {
+  res.send("Terms and Conditions content goes here...");
+};
+
+
+
 
 //BOOK APPOINTMENT
 /*const bookAppointmentController = async (req, res) => {
@@ -535,4 +543,4 @@ const userAppointmentsController = async (req, res) => {
   }
 };
 
-module.exports = { loginController, verify2FAController, registerController, authController , applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDocotrsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController};
+module.exports = { loginController, verify2FAController, registerController, authController , applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDocotrsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController, getTermsAndConditions};

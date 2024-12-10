@@ -15,6 +15,7 @@ import Doctors from "./pages/admin/Doctors";
 import Users from "./pages/admin/Users";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import Profile from "./pages/doctor/Profile";
+import Termsandconditions from "./pages/Termsandconditions";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -111,6 +112,14 @@ function App() {
               element={
                 <PublicRoute>
                   <Register />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/terms-and-conditions"
+              element={
+                <PublicRoute>
+                  <Termsandconditions/>
                 </PublicRoute>
               }
             />
