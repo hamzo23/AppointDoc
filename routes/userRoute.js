@@ -10,8 +10,11 @@ const {
   bookAppointmentController,
   bookingAvailabilityController,
   userAppointmentsController,
+  getTermsAndConditions
 } = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
+// const termscontroller = require("../controllers/termscontroller");
+
 
 //router object
 const router = express.Router();
@@ -19,6 +22,9 @@ const router = express.Router();
 //routes
 // POST || LOGIN USER
 router.post("/login", loginController);
+
+//Terms and Conditions
+// router.get("/terms-and-conditions", termscontroller);
 
 //POST || REGISTER USER
 router.post("/register", registerController);
@@ -46,5 +52,7 @@ router.post("/booking-availbility", authMiddleware, bookingAvailabilityControlle
 
 //Appointments List
 router.get("/user-appointments", authMiddleware, userAppointmentsController);
+
+router.get("/terms-and-conditions", getTermsAndConditions);
 
 module.exports = router;
