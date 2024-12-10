@@ -8,12 +8,14 @@ import Appointments from "./pages/Appointments";
 import BookingPage from "./pages/BookingPage";
 import HomePage from "./pages/HomePage";
 import Login from "./pages/Login";
+import TwoFactorAuth from "./pages/TwoFactorAuth";
 import NotificationPage from "./pages/NotificationPage";
 import Register from "./pages/Register";
 import Doctors from "./pages/admin/Doctors";
 import Users from "./pages/admin/Users";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import Profile from "./pages/doctor/Profile";
+import Termsandconditions from "./pages/Termsandconditions";
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -104,11 +106,20 @@ function App() {
                 </PublicRoute>
               }
             />
+            <Route path="/2fa" element={<TwoFactorAuth />} />
             <Route
               path="/register"
               element={
                 <PublicRoute>
                   <Register />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/terms-and-conditions"
+              element={
+                <PublicRoute>
+                  <Termsandconditions/>
                 </PublicRoute>
               }
             />

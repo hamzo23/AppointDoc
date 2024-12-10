@@ -14,20 +14,36 @@ const Login = () => {
     try {
       dispatch(showLoading());
       const { data } = await axios.post("/api/user/login", values);
-      window.location.reload();
       dispatch(hideLoading());
       if (data.success) {
-        localStorage.setItem("token", data.token);
-        message.success("Login Successfully");
-        navigate("/");
+        message.info("2FA Code Sent. Redirecting...");
+        navigate("/2fa", { state: { email: values.email } }); 
       } else {
         message.error(data.message);
       }
     } catch (error) {
       dispatch(hideLoading());
-      message.error("Something went wrong");
+      message.error(error?.response?.data || "Something went wrong");
     }
   };
+  // const submitHandler = async (values) => {
+  //   try {
+  //     dispatch(showLoading());
+  //     const { data } = await axios.post("/api/user/login", values);
+  //     window.location.reload();
+  //     dispatch(hideLoading());
+  //     if (data.success) {
+  //       localStorage.setItem("token", data.token);
+  //       message.success("Login Successfully");
+  //       navigate("/");
+  //     } else {
+  //       message.error(data.message);
+  //     }
+  //   } catch (error) {
+  //     dispatch(hideLoading());
+  //     message.error("Something went wrong");
+  //   }
+  // };
 
   return (
     <>
