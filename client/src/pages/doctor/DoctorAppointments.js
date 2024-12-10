@@ -96,7 +96,7 @@ const DoctorAppointments = () => {
   return (
     <Layout>
       <h3>Appointments Lists</h3>
-      <Table columns={columns} dataSource={appointments} />
+      <Table columns={columns} dataSource={appointments.map(appointment => ({ ...appointment, key: appointment._id }))} />
     </Layout>
   );
 };

@@ -87,7 +87,7 @@ const Doctors = () => {
   return (
     <Layout>
       <h3 className="text-center m-3">All Doctors</h3>
-      <Table columns={columns} dataSource={doctors} />
+      <Table columns={columns} dataSource={doctors.map(doctor => ({ ...doctor, key: doctor._id }))} />
     </Layout>
   );
 };

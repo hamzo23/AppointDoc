@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   loginController,
+  verify2FAController,
   registerController,
   authController,
   applyDoctorController,
@@ -23,8 +24,8 @@ const router = express.Router();
 // POST || LOGIN USER
 router.post("/login", loginController);
 
-//Terms and Conditions
-// router.get("/terms-and-conditions", termscontroller);
+// POST || VERIFY 2FA CODE
+router.post("/verify-2fa", verify2FAController);
 
 //POST || REGISTER USER
 router.post("/register", registerController);
