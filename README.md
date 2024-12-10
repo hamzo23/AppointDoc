@@ -80,7 +80,7 @@ To set up BloodLife locally, follow these steps:
       
 - Install the required dependencies for backend:
 
-      npm install express joi jsonwebtoken moment mongoose morgan nodemon zxcvbn dotenv colors bcryptjs
+      npm install express joi jsonwebtoken moment mongoose morgan nodemon zxcvbn dotenv colors bcryptjs nodemailer
      
 - Navigate to the client directory: 
 
@@ -88,11 +88,11 @@ To set up BloodLife locally, follow these steps:
     
 - Install the dependencies for the client: 
 
-       npm i react-router-dom react-redux axios antd @reduxjs/toolkit react-bootstrap moment
+       npm i react-router-dom react-redux axios antd @reduxjs/toolkit react-bootstrap moment react-hot-toast
     
 - Create a .env file in the root directory with the following environment variables:
 
-       DB_URL = mongodb+srv://<user>:<pass>@cluster0.l17quyr.mongodb.net/database
+       DB_URL = mongodb+srv://kumailkazmi14:cybercode24@doctorbooking.18ahm.mongodb.net/bookDoctor
 
        JWT_SECRET = A_Secret_Value
   
