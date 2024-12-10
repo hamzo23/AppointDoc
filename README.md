@@ -88,7 +88,7 @@ To set up BloodLife locally, follow these steps:
     
 - Install the dependencies for the client: 
 
-       npm i react-router-dom react-redux axios antd @reduxjs/toolkit react-bootstrap moment react-hot-toast
+       npm i react-router-dom react-redux axios antd @reduxjs/toolkit react-bootstrap moment react-hot-toast react-google-recaptcha
     
 - Create a .env file in the root directory with the following environment variables:
 
